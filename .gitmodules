@@ -1,0 +1,6 @@
+[submodule "RAG"]
+	path = RAG
+	url = https://github.com/SliverBuddy/SliverBuddy.git
+[submodule "chat-ollama"]
+	path = chat-ollama
+	url = https://github.com/SliverBuddy/SliverBuddy.git
