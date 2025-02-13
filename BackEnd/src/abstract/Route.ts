@@ -1,10 +1,10 @@
 import { Router } from "express";
 import { Contorller } from "../abstract/Contorller"; // 修正拼字
 
-export abstract class Route {
+export abstract class Route<T extends Contorller> {
     
     protected abstract url: string; // API 路徑
-    protected abstract controller: Contorller; // 修正命名
+    protected abstract controller: T; // 使用泛型來指定 Controller 類型
 
     protected router = Router();
 

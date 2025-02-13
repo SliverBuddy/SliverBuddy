@@ -1,19 +1,21 @@
+import { RagService } from "../Service/RagService"; // 引入 RagService
+import { Contorller } from "../abstract/Contorller"; // 引入 Contorller
 import { Request, Response } from "express";
-import { RagService } from "../Service/RagService";
-import { RagRequest } from "../interfaces/RagRequest";
 
-export class RagController {
-    private ragService: RagService;
+export class RagController extends Contorller {
+    // 定義 service 屬性，並確保它是 RagService 類型
+    protected service: RagService;
 
-    constructor(ragService: RagService) {
-        this.ragService = ragService;
+    constructor(service: RagService) {
+        super(); // 呼叫父類建構函式
+        this.service = service; // 初始化 service 屬性
     }
 
     async askWithDocs(req: Request, res: Response) {
-        const request: RagRequest = req.body;
+        const request = req.body;
 
         try {
-            const response = await this.ragService.askWithDocs(request);
+            const response = await this.service.askWithDocs(request);
             res.json({ reply: response });
         } catch (error) {
             console.error("RAG 錯誤:", error);
