@@ -1,38 +1,52 @@
-import express from 'express'
-import {router} from "./Routers"
+import express from 'express';
+import { router } from "./Routers"; // ✅ 確保正確載入
 import { logger } from './middlewares/log';
-const http = require('http');
+import http from 'http';
 import cors from 'cors';
 import { MongoDB } from './utils/MongoDB';
-require('dotenv').config()
-const app: express.Application = express()
+import dotenv from 'dotenv';
+
+dotenv.config(); // ✅ 確保載入 .env
+
+const app: express.Application = express();
 const server = http.createServer(app);
 
-export const DB = new MongoDB({
-  name:process.env.DBUSER as string,
-  password:process.env.DBPASSWORD as string,
-  host:process.env.DBHOST as string,
-  port:process.env.DBPORT as string,
-  dbName:process.env.DBNAME as string
-});
+// ✅ 檢查環境變數，避免 undefined 問題
+const PORT = process.env.PORT || 3000;
+const DB_CONFIG = {
+  name: process.env.DBUSER || '',
+  password: process.env.DBPASSWORD || '',
+  host: process.env.DBHOST || 'localhost',
+  port: process.env.DBPORT || '27017',
+  dbName: process.env.DBNAME || 'test'
+};
 
+// ✅ 初始化 MongoDB 連線
+export const DB = new MongoDB(DB_CONFIG);
+
+// ✅ 設定 CORS
 app.use(cors({
-  // "origin": "https://sec.ethci.app",
-  "origin": "*",
-  "methods": "GET,HEAD,PUT,PATCH,POST,DELETE",
-  "preflightContinue": false,
-  "optionsSuccessStatus": 200,
-  "exposedHeaders": ['Content-Disposition']
-}))
+  origin: "*", // 可設定特定網域
+  methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+  preflightContinue: false,
+  optionsSuccessStatus: 200,
+  exposedHeaders: ['Content-Disposition']
+}));
 
-app.use(express.json({limit:'50mb'}));
-app.use(express.urlencoded({ extended: false }))
-app.use('/assets', express.static(process.env.assetsPath as string));
+// ✅ 設定 Body Parser
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ extended: false }));
 
+// ✅ 設定靜態資源
+const assetsPath = process.env.ASSETS_PATH || 'public';
+app.use('/assets', express.static(assetsPath));
+
+// ✅ 自動註冊所有路由
 for (const route of router) {
-  app.use(route.getRouter())
+  app.use(route.getUrl(), route.getRouter());
 }
 
-server.listen(process.env.PORT, () => {
-  logger.info('listening on *:'+process.env.PORT);
+// ✅ 啟動 HTTP 伺服器
+server.listen(PORT, () => {
+  logger.info(`🚀 Server running on http://localhost:${PORT}`);
 });
