@@ -5,6 +5,7 @@ import http from 'http';
 import cors from 'cors';
 import { MongoDB } from './utils/MongoDB';
 import dotenv from 'dotenv';
+import fs from 'fs'; // new test
 
 dotenv.config(); // ✅ 確保載入 .env
 
@@ -37,9 +38,22 @@ app.use(cors({
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: false }));
 
-// ✅ 設定靜態資源
+/* ✅ 設定靜態資源
 const assetsPath = process.env.ASSETS_PATH || 'public';
-app.use('/assets', express.static(assetsPath));
+app.use('/assets', express.static(assetsPath));**/
+
+// 41 - 43 修正成 46 - 56
+const assetsPath = process.env.ASSETS_PATH || 'public';
+// 確保目錄存在，避免 Express 嘗試讀取錯誤的路徑
+if (fs.existsSync(assetsPath)) {
+  app.use('/assets', express.static(assetsPath));
+} else {
+  console.warn(`Warning: Assets path '${assetsPath}' does not exist.`);
+}
+// 設定 API 根路由，避免 Express 嘗試載入 index.html
+app.get("/", (req, res) => {
+  res.send("Welcome to the API! No index.html needed.");
+});
 
 // ✅ 自動註冊所有路由
 for (const route of router) {
